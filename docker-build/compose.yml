@@ -1,0 +1,12 @@
+version: '0.1'
+services:
+  librarian:
+    image: ghcr.io/jgreaux/librarian:latest
+    ports:
+      - '8000:8000'
+    volumes:
+      - /path/to/my/storage/folder:/data
+#      - /volume1/docker/stirling-pdf/extraConfigs:/configs
+    environment:
+      - ADMINISTRATOR_USERNAME=librarian
+      - ADMINISTRATOR_PASSWORD=shush

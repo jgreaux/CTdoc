@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BiblioTech</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="main">
+    <div id="header">
+      <input type="text" id="search" placeholder="&#x1F50D; Recherche PDF ...">
+    </div>
+    <div id="nav">
+      <div id="options"></div>
+      <div id="folder">
+        <div id="content"></div>
+        <div id="count"></div>
+      </div>
+    </div>
+  </div>
+  <div id="pdf">
+    <embed id="display" type="application/pdf" class="hide">
+    <p id="fallback-pdf">Selectionner un fichier dans la liste</p>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

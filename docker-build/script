@@ -1,0 +1,9 @@
+## Log with github PAT
+echo "token" | docker login ghcr.io -u jgreaux --password-stdin
+
+docker build --platform aarch64 -t ghcr.io/jgreaux/librarian:latest -f ./docker-build/Dockerfile .
+docker push ghcr.io/jgreaux/librarian:latest
+
+docker run --name librarian-build -v "C:\Users\GREAUX JC\Documents\DCCommit\SASU\Creation":/data -p 8000:8000 -d ghcr.io/jgreaux/librarian:latest
+docker run -it --entrypoint /bin/bash deno-server
+
