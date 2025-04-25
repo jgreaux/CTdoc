@@ -1,2 +1,2 @@
 docker build -t deno-server ./docker-dev
-docker run --name librarian -v "C:\Users\GREAUX JC\Documents\DCCommit\SASU":/data -v "C:\Users\GREAUX JC\Documents\Side Project\Librarian":/app -p 8000:8000 -d deno-server
+docker run --name ctdoc -v "C:\Users\GREAUX JC\Documents\Side Project\Librarian\data":/data -v "C:\Users\GREAUX JC\Documents\Side Project\Librarian":/app -p 8000:8000 -d deno-server

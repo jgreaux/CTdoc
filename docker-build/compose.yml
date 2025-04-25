@@ -1,7 +1,7 @@
 version: '0.1'
 services:
-  librarian:
-    image: ghcr.io/jgreaux/librarian:latest
+  ctdoc:
+    image: ghcr.io/jgreaux/ctdoc:latest
     ports:
       - '8000:8000'
     volumes:

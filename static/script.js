@@ -2,14 +2,14 @@ const search = document.getElementById("search")
 const optionsColumn = document.getElementById("options")
 const content = document.getElementById("content")
 const count = document.getElementById("count")
-const pdf = document.getElementById("display")
+const pdf = document.getElementById("pdf-container")
 const fallback = document.getElementById("fallback-pdf")
 
-let tree = undefined
+
 let list = []
 
 let optionTheme = ""
-let optionGroup = ""
+let optionYear = ""
 let optionSearch = ""
 
 let currentPDF = ""
@@ -18,29 +18,35 @@ let currentSelect = undefined
 let lastOption = undefined
 
 async function displayTree(){
-	if (tree == undefined) {
-		tree = await getTree()
-	}
-	const buttonAll = createButton("Tout Afficher", "selected", updateOptions)
+	const chargingList = getTree()
+
+	const buttonAll = createButton("TOUT", "theme selected", (ev)=>updateOptions(ev))
+	const buttonFACTURE = createButton("FACTURE", "theme", (ev)=>updateOptions(ev, "FACTURE"))
+	const buttonRTT = createButton("RT", "theme", (ev)=>updateOptions(ev, "RT"))
+	const buttonRTTI = createButton("RTTI", "theme", (ev)=>updateOptions(ev, "RTTI"))
+	const buttonYear = createButton("ANNEE", "theme", (ev)=>updateOptions(ev, "ANNEE"))
+	optionsColumn.append(buttonAll, buttonFACTURE, buttonRTT, buttonRTTI, buttonYear)
 	lastOption = buttonAll
-	optionsColumn.appendChild(buttonAll)
-	
-	tree.forEach(el => {
-		const themeButton = createButton(el.theme, "theme", (ev)=> updateOptions(ev, el.theme))
-		optionsColumn.appendChild(themeButton)
-		
-		el.subtheme.forEach((el2)=> {
-			const b = createButton(el2, "subtheme", (ev)=> updateOptions(ev, el.theme, el2))
-			optionsColumn.appendChild(b)
-		})
-	})
+
+	await chargingList
+
+	const listYears = list.reduce((acc, curr) => (curr.year != "" && !acc.includes(curr.year)) ? [...acc, curr.year] : acc
+	, []).sort()
+
+	listYears.forEach(el => optionsColumn.appendChild(
+		createButton(
+			el, 
+			"subtheme", 
+			ev => updateOptions(ev, "ANNEE", el)
+		)
+	))
 
 	displayContent()
 }
 
 function displayContent(){
 	content.innerHTML = ""
-	const list = getList(optionTheme, optionGroup, optionSearch)
+	const list = getList(optionTheme, optionYear, optionSearch)
 	list.forEach(el=> {
 		content.appendChild(createPreview(el.title, el.path))
 	})
@@ -63,10 +69,9 @@ function research(ev){
 }
 
 function displayPDF(path){
-	const current = pdf.src ? new URL(pdf.src) : undefined
-	if(path == decodeURIComponent(current?.pathname)) return
-	pdf.src = path
 	currentPDF = path
+	pdf.innerHTML = ""
+	pdfPlay()
 
 	if(currentPDF !== ""){
 		fallback.classList.add("hide")
@@ -91,13 +96,14 @@ function createPreview(title, path){
 	const main = document.createElement("li")
 	main.innerText = title
 	main.addEventListener("click", (ev)=>{
+		if(path == currentPDF) return
 		displayPDF(path)
 		switchCurrent(ev.target)
 	})
-	main.addEventListener("dblclick", ()=>{
-		window.open(path, '_blank');
-	})
-	if(currentPDF == path) main.className = "current"
+	if(currentPDF == path) {
+		main.className = "current"
+		currentSelect = main
+	}
 	
 	return main
 }
@@ -108,17 +114,17 @@ function switchCurrent(target) {
 	currentSelect = target
 }
 
-function updateOptions(ev, t = "", g = ""){
+function updateOptions(ev, t = "", y = ""){
 	if(ev.target == lastOption) return
 	lastOption.classList.remove("selected")
 	lastOption = ev.target
 	lastOption.classList.add("selected")
 	optionTheme = t
-	optionGroup = g
+	optionYear = y
+
 	displayContent()
 }
 
-//----------------- Mok up --------------//
 async function getTree(){
 	try {
 		const response = await fetch('./api/index');
@@ -128,34 +134,21 @@ async function getTree(){
 		const data = await response.json();
 		list = data.sort((a, b) =>  a.path.localeCompare(b.path));
 	  } catch (error) {
-		list = [{title:"NotFound", theme:"", subtheme:"", path:"", preview: ""}];
+		list = [{title:"NotFound", type:"", year:"", path:""}];
 	  }
-
-	  const themes = []
-	  const t = []
-	  list.forEach(el => {
-		if(el.theme != "" && !themes.includes(el.theme)){
-			themes.push(el.theme)
-			t.push({theme:el.theme, subtheme:[]})
-		}
-		if(el.subtheme != ""){
-			const current = t.find(el2 => el2.theme == el.theme)
-			if (!current.subtheme.includes(el.subtheme)) {
-				current.subtheme.push(el.subtheme)
-			}
-		}
-	  })
-	  return t
 }
-function getList(t="", g="", s = ""){
+
+function getList(t="", y="", s = ""){
 	let dataSet = [...list]
 	
-	if(t != ""){
-		dataSet = dataSet.filter( el => el.theme == t)
+	if(t == "ANNEE"){
+		dataSet = dataSet.filter( el => el.year != "")
+	}else if(t != ""){
+		dataSet = dataSet.filter( el => el.type == t)
 	}
 	
-	if(g != ""){
-		dataSet = dataSet.filter( el => el.subtheme == g)
+	if(y != ""){
+		dataSet = dataSet.filter( el => el.year == y)
 	}
 	
 	if(s != ""){
@@ -170,6 +163,30 @@ function getList(t="", g="", s = ""){
 	}
 	
 	return dataSet
+}
+
+function pdfPlay() {
+	const url = currentPDF
+
+	const container = document.getElementById('pdf-container');
+	pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  
+	pdfjsLib.getDocument(url).promise.then(pdf => {
+	  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+		pdf.getPage(pageNum).then(page => {
+		  const viewport = page.getViewport({ scale: 1.5 });
+		  const canvas = document.createElement('canvas');
+		  const context = canvas.getContext('2d');
+		  canvas.height = viewport.height;
+		  canvas.width = viewport.width;
+  
+		  page.render({ canvasContext: context, viewport });
+		  container.appendChild(canvas);
+		});
+	  }
+	}).catch(err => {
+	  container.innerHTML = `<p style="color: red;">Error loading PDF: ${err.message}</p>`;
+	});
 }
 
 //------------------ init -----------------//

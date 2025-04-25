@@ -1,10 +1,10 @@
 import { serveDir } from "https://deno.land/std@0.203.0/http/file_server.ts";
 import { parse } from "./utils/indexfolder.ts";
-import { init, close, getIndex } from "./utils/db.ts";
+import { init, reinit, close, getIndex } from "./utils/db.ts";
 
 const dataRoot = "/data"
 
-const index = await parse(dataRoot);
+let index = await parse(dataRoot);
 init(index)
 
 addEventListener("unload", close);
@@ -17,6 +17,18 @@ Deno.serve(async (req) => {
       headers: { "Content-Type": "application/json" },
     });
   }
+
+  if (url.pathname === "/api/reindex" && req.method === "GET") {
+    index = await parse(dataRoot)
+    reinit(index)
+    return new Response(null, {
+      status: 302, // or 301 for permanent
+      headers: {
+        Location: "/",
+      },
+    });
+  }
+
   if (url.pathname.startsWith("/doc/") && req.method === "GET") {
     const filePath = decodeURIComponent(dataRoot + url.pathname.substring(4))
     try {

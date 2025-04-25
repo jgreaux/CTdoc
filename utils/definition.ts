@@ -1,6 +1,6 @@
 export type Book = {
 	title: string;
-	theme: string;
-	subtheme: string;
+	type: string;
+	year: string;
 	path: string;
 } 

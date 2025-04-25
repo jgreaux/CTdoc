@@ -5,11 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BiblioTech</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.0.375/pdf_viewer.min.css" integrity="sha512-bt54/qzXTxutlNalAuK/V3dxe1T7ZDqeEYbZPle3G1kOH+K1zKlQE0ZOkdYVwPDxdCFrdLHwneslj7sA5APizQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
   <div id="main">
     <div id="header">
-      <input type="text" id="search" placeholder="&#x1F50D; Recherche PDF ...">
+      <input type="text" id="search" placeholder=" Recherche PDF ...">
+      <button onclick="location.href = '/api/reindex' ">&#128260;</button>
     </div>
     <div id="nav">
       <div id="options"></div>
@@ -20,9 +22,10 @@
     </div>
   </div>
   <div id="pdf">
-    <embed id="display" type="application/pdf" class="hide">
+    <div id="pdf-container" class="hide"></div>
     <p id="fallback-pdf">Selectionner un fichier dans la liste</p>
   </div>
   <script src="script.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </body>
 </html>
