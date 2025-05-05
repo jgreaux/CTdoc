@@ -11,20 +11,20 @@
   <div id="main">
     <div id="header">
       <input type="text" id="search" placeholder=" Recherche PDF ...">
-      <button onclick="location.href = '/api/reindex' ">&#128260;</button>
+      <button onclick="location.href = '/api/reindex' "><img src="./reload.webp" alt="&#128260;"></button>
     </div>
     <div id="nav">
       <div id="options"></div>
-      <div id="folder">
-        <div id="content"></div>
-        <div id="count"></div>
-      </div>
+      <div id="content"></div>
     </div>
+    <div id="count"></div>
   </div>
   <div id="pdf">
+    <button id="left" class="pdf-button hide"> <img src="right-arrow.webp" alt="<"> </button>
     <div id="pdf-container" class="hide"></div>
     <p id="fallback-pdf">Selectionner un fichier dans la liste</p>
-  </div>
+    <button id="right" class="pdf-button hide"> <img src="right-arrow.webp" alt=">"> </button>
+    <p id="countPage"></p>
   <script src="script.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </body>

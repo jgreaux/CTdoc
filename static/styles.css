@@ -1,6 +1,7 @@
 :root{
 	--my-grey: rgb(200, 200, 200);
-	--flat-border: 2px solid #ccc;
+	--flat-border: 1px solid #ccc;
+	--width-pdf: calc(100vh / 297 * 210)
 }
 
 body{
@@ -11,14 +12,15 @@ body{
 	height: 100vh;
 	background-color: white;
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	min-width: calc(1200px + var(--width-pdf))
 }
 
 #main{
 	display: flex;
 	flex-direction: column;
-	width: 50%;
-	min-width: 600px;
+	min-width: 1200px;
 	max-width: 1200px;
+	border: var(--flat-border);
 }
 
 #header{
@@ -28,10 +30,8 @@ body{
 
 #header input {
 	height: 30px;
-	width: 90%;
+	width: calc(100% - 150px);
 	border: none;
-	border-left: var(--flat-border);
-	border-right: var(--flat-border);
 	background-color: transparent;
 	padding: 10px;
 	font-size: 20px;
@@ -40,86 +40,118 @@ body{
 
 #header button {
 	all: unset;
+	display: flex;
+  	align-items: center;
+	justify-content: center;
 	text-align: center;
-	width: 10%;
+	width: 180px;
 	height: 100%;
-	font-size: 30px;
-	border-right:var(--flat-border);
+	font-size: 35px;
+}
+
+#header button img{
+	width: 30px;
+}
+
+#left img{
+	transform: rotate(180deg);
 }
 
 #header button:hover {
 	cursor: pointer;
+	background-color: var(--my-grey);
 }
 
 #nav{
 	display: flex;
-	height:calc(100vh - 50px);
+	height:calc(100vh - 80px);
+	border-top: var(--flat-border);
+	border-bottom: var(--flat-border);
+	min-width: 1200px;
+	max-width: 1200px;
 }
 
 #options{
 	display: flex;
 	flex-direction: column;
+	width: 200px;
+	border-right: var(--flat-border);
 }
 
 #content{
 	height:calc(100% - 32px);
+	width: 1000px;
 }
 
-#content li{
-	list-style: none;
-	margin: 5px;
-	padding: 15px;
+#content table{
+	width: 100%;
+	table-layout: auto;
 }
 
-#content li::before{
-	content: "📄";
-	margin: 5px;	
+#options{
+	width: 200px;
 }
 
-#options, #folder{
-	width: 50%;
-	min-width: 300px;
-	border: 2px solid var(--my-grey);
+#folder{
+	width: max-content;
 }
 
 #options, #content{
-	overflow-y: auto;
+	overflow-y: scroll;
 	overflow-x: hidden;
 	overflow-wrap: break-word;
 }
 
 #count{
+	display: flex;
+  	align-items: center;
+	justify-content: center;
 	text-align: center;
 	min-height: 30px;
-	height: 30px;
-	border-top: 2px solid var(--my-grey);
+	max-height: 30px;
 }
 
 #options button{
 	height: 40px;
+	padding: 15px;
 	width: auto;
 }
 
 #pdf{
+	position: relative;
 	min-width: 420px;
 	min-height: 300px;
-	height: 100%;
-	width: 50%;
+	height: calc(100vh-2px);
+	width: var(--width-pdf);
 	max-width: 1260px;
 	max-height: 1800px;
 	background-color: var(--my-grey);
 	display: flex;
 	justify-content: space-evenly;
     align-items: center;
+	border: var(--flat-border);
 }
 
 #pdf-container{
-	width: 100%;
-	height: 100%;
-	overflow: auto;
+	height: 100vh;
+	overflow: hidden;
 }
 
-.theme, .subtheme{
+#countPage{
+	display: none;
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	text-align: center;
+}
+
+#pdf:hover #countPage{
+	display: block;
+}
+
+
+.theme, .subtheme, .pdf-button{
 	all: unset;
 }
 
@@ -148,7 +180,78 @@ body{
 	display: none;
 }
 
+tbody tr:hover{
+	background-color: var(--my-grey);
+	cursor: pointer;
+}
+
+th, td{
+	text-align: start;
+	padding: 10px;
+}
+
+th:nth-child(4){
+	width: 150px;
+	text-align: center;
+	padding: 0;
+}
+
+.c0{
+	min-width: 100px;
+	max-width: 100px;
+}
+
+.c1{
+	min-width: 420px;
+	max-width: 420px;
+}
+
+.c2{
+	min-width: 250px;
+	max-width: 250px;
+}
+
+.c3{
+	min-width: 150px;
+	max-width: 150px;
+	padding: 0;
+	text-align: center;
+}
+
+
 canvas {
-	width:100%;
+	height: 100%;
+	min-height: 600px;
 	box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
-  }
+}
+
+.fallback-pdf{
+	height: 100vh;
+	min-height: 600px;
+}
+
+.pdf-button{
+	position: absolute;
+	height: 50vh;
+	width: 150px;
+	background-color: rgba(255, 255, 255, 0);
+	text-align: center;
+}
+
+.pdf-button:hover img{
+	opacity: 0.5;
+	cursor: pointer;
+}
+
+.pdf-button img{
+	width: 50%;
+	opacity: 0.05;
+}
+
+#left{
+	left: 0;	
+}
+
+#right{
+	right: 0;
+}

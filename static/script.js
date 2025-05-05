@@ -4,7 +4,37 @@ const content = document.getElementById("content")
 const count = document.getElementById("count")
 const pdf = document.getElementById("pdf-container")
 const fallback = document.getElementById("fallback-pdf")
+const leftPdf = document.getElementById("left")
+const rightPdf = document.getElementById("right")
+const countPage = document.getElementById("countPage")
 
+leftPdf.addEventListener("click", ()=>{
+	if(currentPage == 0) return
+	currentPage --
+
+	if(currentPage == 0){
+		leftPdf.classList.add("hide")
+	}else{
+		leftPdf.classList.remove("hide")
+	}
+
+	rightPdf.classList.remove("hide")
+	displayPagePDF()
+})
+
+rightPdf.addEventListener("click", ()=>{
+	if(pdfPages.length < 2 || currentPage == pdfPages.length - 1) return
+	currentPage ++
+
+	if(currentPage == pdfPages.length - 1){
+		rightPdf.classList.add("hide")
+	}else{
+		rightPdf.classList.remove("hide")
+	}
+
+	leftPdf.classList.remove("hide")
+	displayPagePDF()
+})
 
 let list = []
 
@@ -13,6 +43,8 @@ let optionYear = ""
 let optionSearch = ""
 
 let currentPDF = ""
+let currentPage = 0
+let pdfPages = []
 let currentSelect = undefined
 
 let lastOption = undefined
@@ -47,14 +79,18 @@ async function displayTree(){
 function displayContent(){
 	content.innerHTML = ""
 	const list = getList(optionTheme, optionYear, optionSearch)
-	list.forEach(el=> {
-		content.appendChild(createPreview(el.title, el.path))
-	})
-	displayCount(list.length)
+	const header = ["TYPE", "MODELE", "VIN", "ANNEE"]
+	const body = list.map(el => [el.type, el.brand, el.vin, el.year, el.path])
+	content.appendChild(createTable(header, body))
+	displayFileCount(list.length, list.reduce((s, el) => el.size + s ,0))
 }
 
-function displayCount(c) {
-	count.innerHTML = `Nombre de fichiers : ${c}`
+function displayFileCount(c, s) {
+	count.innerHTML = `Nombre de fichiers : ${c} - ${ s < 1000000 ? `${parseInt(s/1000)} Ko` : `${(s/1000000).toFixed(2)} Mo`}`
+}
+
+function displayPageCount() {
+	countPage.innerHTML = pdfPages.length > 0 ? `Page:${currentPage + 1}/${pdfPages.length}` : "Page: 0/0"
 }
 
 function research(ev){
@@ -80,6 +116,15 @@ function displayPDF(path){
 		pdf.classList.add("hide")
 		fallback.classList.remove("hide")
 	}
+
+	leftPdf.classList.add("hide")
+}
+
+function displayPagePDF() {
+	if (pdfPages.length == 0) return
+	pdf.innerHTML = ""
+	pdf.appendChild(pdfPages[currentPage])
+	displayPageCount()
 }
 
 //----- utils ---- //
@@ -92,20 +137,45 @@ function createButton(label, classList = "", event){
 	return b
 }
 
-function createPreview(title, path){
-	const main = document.createElement("li")
-	main.innerText = title
-	main.addEventListener("click", (ev)=>{
-		if(path == currentPDF) return
-		displayPDF(path)
-		switchCurrent(ev.target)
+function createTable(head, body) {
+	const table = document.createElement("table")
+
+	const h = document.createElement("thead")
+	const trh = document.createElement("tr")
+	h.appendChild(trh)
+	head.forEach(el => {
+		const th = document.createElement("th")
+		th.innerHTML = el
+		trh.appendChild(th)
 	})
-	if(currentPDF == path) {
-		main.className = "current"
-		currentSelect = main
-	}
-	
-	return main
+
+	const b = document.createElement("tbody")
+	body.forEach(el => {
+		const tr = document.createElement("tr")
+		el.forEach((el2, i) => {
+			if(i == el.length -1){
+				const path = el2
+				tr.addEventListener("click", ()=>{
+					if(path == currentPDF) return
+					displayPDF(path)
+					switchCurrent(tr)
+				})
+				if(currentPDF == path) {
+					tr.className = "current"
+					currentSelect = main
+				}
+			}else{
+				const td = document.createElement("td")
+				td.classList.add(`c${i}`)
+				td.innerHTML = el2
+				tr.appendChild(td)
+			}
+		})
+		b.appendChild(tr)
+	})
+
+	table.append(h, b)
+	return table
 }
 
 function switchCurrent(target) {
@@ -153,10 +223,10 @@ function getList(t="", y="", s = ""){
 	
 	if(s != ""){
 		const search = s.toLowerCase()
-		dataSet = dataSet.filter(el => el.title.toLowerCase().includes(search))
+		dataSet = dataSet.filter(el => el.path.toLowerCase().includes(search))
 		.sort((a, b) => {
-			const posA = a.title.toLowerCase().indexOf(search);
-			const posB = b.title.toLowerCase().indexOf(search);
+			const posA = a.path.toLowerCase().indexOf(search);
+			const posB = b.path.toLowerCase().indexOf(search);
 
 			return (posA === -1 ? Infinity : posA) - (posB === -1 ? Infinity : posB);
 		})
@@ -167,25 +237,35 @@ function getList(t="", y="", s = ""){
 
 function pdfPlay() {
 	const url = currentPDF
+	currentPage = 0
+	pdfPages = []
 
-	const container = document.getElementById('pdf-container');
 	pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   
 	pdfjsLib.getDocument(url).promise.then(pdf => {
 	  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
 		pdf.getPage(pageNum).then(page => {
-		  const viewport = page.getViewport({ scale: 1.5 });
+		  const viewport = page.getViewport({ scale: 1 });
 		  const canvas = document.createElement('canvas');
 		  const context = canvas.getContext('2d');
 		  canvas.height = viewport.height;
 		  canvas.width = viewport.width;
   
 		  page.render({ canvasContext: context, viewport });
-		  container.appendChild(canvas);
+		  pdfPages.push(canvas);
+		  if(pageNum == pdf.numPages){
+			if (pdfPages.length < 2) {
+				rightPdf.classList.add("hide")
+			}else{
+				rightPdf.classList.remove("hide")
+			}
+			displayPagePDF()
+		  }
 		});
 	  }
-	}).catch(err => {
-	  container.innerHTML = `<p style="color: red;">Error loading PDF: ${err.message}</p>`;
+	})
+	.catch(err => {
+	  pdf.innerHTML = `<p style="color: red;">Error loading PDF: ${err.message}</p>`;
 	});
 }
 

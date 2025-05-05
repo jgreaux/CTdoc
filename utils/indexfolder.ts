@@ -5,7 +5,8 @@ export async function parse(root: string, path: string = ""){
     for await (const dirEntry of Deno.readDir(root+path)) {
         if (dirEntry.isFile) {
             if(!(dirEntry.name as string).endsWith(".pdf")) continue
-            const entry = await createEntry(path, dirEntry.name)
+            const size = (await Deno.stat(`${root+path}/${dirEntry.name}`)).size
+            const entry = await createEntry(path, dirEntry.name, size)
             if(!entry) continue
             indexList.push(entry)
         }else{
@@ -16,12 +17,12 @@ export async function parse(root: string, path: string = ""){
     return indexList
 }
 
-async function createEntry(root: string, title: string) {
+async function createEntry(root: string, title: string, size: number) {
     const path = `/doc${root}/${title}`
     const parse = parseTitle(title)
     if (!parse) return null
 
-    return {title, ...parse , path}
+    return {size, ...parse , path}
 }
 
 function ignoreParenthese(s:string) {
@@ -48,10 +49,12 @@ function getYear(s:string) {
 
 function parseTitle(t:string) {
     const splitTitle =  ignoreParenthese(t).split(" - ")
-    if (splitTitle.length < 3) return null
+    if (splitTitle.length < 4) return null
     const type: string = splitTitle[0]
     if(!["FACTURE","RT","RTTI"].includes(type)) return null
+    const brand: string = splitTitle[1]??""
     const year: string = getYear(splitTitle[2])??""
+    const vin: string = splitTitle[3]??""
 
-    return{type, year}
+    return{type, brand, year, vin}
 }

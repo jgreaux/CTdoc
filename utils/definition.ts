@@ -1,6 +1,8 @@
 export type Book = {
-	title: string;
+	size: number;
 	type: string;
 	year: string;
+	brand: string;
+	vin: string;
 	path: string;
 } 

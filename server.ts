@@ -43,5 +43,5 @@ Deno.serve(async (req) => {
     }
   }
 
-  return serveDir(req, {fsRoot: "./static",});
+  return serveDir(req, {fsRoot: "./static"});
 });
