@@ -78,7 +78,7 @@ async function displayTree(){
 	await chargingList
 
 	const listYears = list.reduce((acc, curr) => (curr.year != "" && !acc.includes(curr.year)) ? [...acc, curr.year] : acc
-	, []).sort()
+	, []).sort().reverse()
 
 	listYears.forEach(el => optionsColumn.appendChild(
 		createButton(
