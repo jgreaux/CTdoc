@@ -133,7 +133,7 @@ body{
 }
 
 #pdf-container{
-	height: 100vh;
+	height: 100%;
 	overflow: hidden;
 }
 
@@ -254,4 +254,16 @@ canvas {
 
 #right{
 	right: 0;
+}
+
+#pdf.float{
+	position: absolute;
+	left: 50%;
+	top:0;
+	transform: translate(-50%);
+	overflow: scroll;
+	height: 200%;
+	width: 200%;
+	min-height: 1200px;
+	box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
 }
